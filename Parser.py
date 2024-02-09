@@ -17,7 +17,10 @@ class Parser:
             if isinstance(parsed_token, PyHexCastError):
                 tokens = parsed_token
                 return tokens
-            tokens.append(parsed_token)
+
+            if tokens != "EOF":
+                tokens.append(parsed_token)
+
             if not is_next:
                 break
         return tokens
