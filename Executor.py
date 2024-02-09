@@ -1,3 +1,4 @@
+from token_types.NumberLiteral import NumberLiteral
 from token_types.Operator import Operator
 
 
@@ -12,6 +13,9 @@ class Executor:
             self.execute_instruction(instruction)
 
     def execute_instruction(self, instruction):
+        if isinstance(instruction, NumberLiteral):
+            self.stack.append(instruction.value)
+
         if instruction == Operator.ADD:
             a = self.stack.pop()
             b = self.stack.pop()
