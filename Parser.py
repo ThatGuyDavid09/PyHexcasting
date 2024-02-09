@@ -6,7 +6,7 @@ from token_types.Operator import Operator
 
 
 class Parser:
-    def __init__(self, lexer):
+    def __init__(self, lexer=None):
         self.lexer = lexer
 
     def process_all_tokens(self):

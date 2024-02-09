@@ -3,7 +3,7 @@ from token_types.Operator import Operator
 
 
 class Executor:
-    def __init__(self, instructions):
+    def __init__(self, instructions=None):
         self.instructions = instructions
         self.stack = []
         self.temporary = None
