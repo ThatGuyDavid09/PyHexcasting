@@ -9,6 +9,7 @@ from token_types.DropKeep import DropKeep
 from token_types.EscapeMode import EscapeMode
 from token_types.NumberLiteral import NumberLiteral
 from token_types.Operator import Operator
+from util.InputParser import InputParser
 from util.LehrerDecoder import permute_end_of_list
 
 
@@ -27,11 +28,11 @@ class Executor:
         did_halt = False
         for instruction in instructions:
             stop = False
-            try:
-                stop = self.execute_instruction(instruction)
-            except Exception as e:
-                print(f"Error at \"{instruction}\"")
-                print("    " + str(e))
+            # try:
+            stop = self.execute_instruction(instruction)
+            # except Exception as e:
+            #     print(f"Error at \"{instruction}\"")
+            #     print("    " + str(e))
             if stop or self.execution_mode == ExecutionMode.STOP:
                 did_halt = True
                 break
@@ -522,6 +523,9 @@ class Executor:
         elif instruction == Operator.CLEAR:
             self.stack.clear()
             self.temporary = None
+        elif instruction == Operator.INPUT:
+            a = input("Input: ")
+            self.stack.append(InputParser.parse_input(a))
 
         elif instruction == "EOF":
             pass

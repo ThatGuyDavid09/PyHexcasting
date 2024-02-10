@@ -14,14 +14,14 @@ def main():
     executor = Executor()
     while True:
         instructions = input()
-        try:
-            lexer = Lexer(instructions)
-            parsed = Parser(lexer).process_all_tokens()
-            executor.execute_instructions(parsed)
-        except Exception as e:
-            print("Exception at parsing")
-            print("    " + str(e))
-            continue
+        # try:
+        lexer = Lexer(instructions)
+        parsed = Parser(lexer).process_all_tokens()
+        executor.execute_instructions(parsed)
+        # except Exception as e:
+        #     print("Exception at parsing")
+        #     print("    " + str(e))
+        #     continue
 
         if executor.temporary is not None:
             print(f"Temp - {executor.temporary}")

@@ -17,4 +17,7 @@ class DropKeep:
         return drop_keep
 
     def __str__(self):
-        return f"DropKeep {self.value}"
+        return f"DropKeep.{self.value}"
+
+    def __repr__(self):
+        return f"<DropKeep.{self.value}>"

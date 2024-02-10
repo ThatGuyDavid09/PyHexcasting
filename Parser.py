@@ -26,6 +26,7 @@ class Parser:
         return tokens
 
     def parse_token(self, token):
+        token = str(token)
         if token == "\n":
             return "EOF", False
         if token.replace('.', '').isnumeric():
@@ -47,7 +48,8 @@ class Parser:
             "mag": "|",
             "pwr": "^",
             "power": "^",
-            "eq": "==",
+            "eq": "=",
+            "==": "=",
             "not_eq": "!=",
             "neq": "!=",
             "gt": ">",

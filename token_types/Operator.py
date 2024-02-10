@@ -53,7 +53,7 @@ class Operator(Enum):
     AND = "and"
     XOR = "xor"
     CONDITIONAL_REMOVE = "cond_remove"
-    EQ = "=="
+    EQ = "="
     NOT_EQ = "!="
     GT = ">"
     LT = "<"
@@ -111,3 +111,4 @@ class Operator(Enum):
 
     # Convenience
     CLEAR = "clr"
+    INPUT = "input"
