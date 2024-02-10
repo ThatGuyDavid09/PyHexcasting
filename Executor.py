@@ -306,7 +306,7 @@ class Executor:
             count = self.stack.pop()
             lst = []
             for i in range(count):
-                lst.appent(self.stack.pop())
+                lst.append(self.stack.pop())
             self.stack.append(lst)
         elif instruction == Operator.UNMK_LST:
             lst = self.stack.pop()
