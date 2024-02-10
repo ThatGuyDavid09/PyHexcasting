@@ -36,11 +36,11 @@ class Parser:
             try:
                 to_ret = DropKeep(token)
             except ValueError:
-                return HexCastSyntaxError(f"{token} is invalid drop_keep syntax"), False
+                return HexCastSyntaxError(f"\"{token}\" is invalid drop_keep syntax"), False
             return to_ret, True
 
         try:
             to_ret = Operator(token)
         except ValueError:
-            return HexCastSyntaxError(f"{token} is an invalid operator"), False
+            return HexCastSyntaxError(f"\"{token}\" is an invalid operator"), False
         return to_ret, True

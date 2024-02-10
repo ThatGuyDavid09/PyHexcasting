@@ -1,3 +1,3 @@
-class PyHexCastError:
+class PyHexCastError(Exception):
     def __init__(self, message):
         self.message = message

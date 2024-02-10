@@ -7,6 +7,7 @@ class Operator(Enum):
     MUL = "*"
     DIV = "/"
     MAG = "|"
+    PWR = "^"
     FLR = "floor"
     CEIL = "ceil"
     VCTR_MK = "vector_mk"
@@ -42,7 +43,7 @@ class Operator(Enum):
     STACK_LEN = "stack_len"
     YANK_N = "yank"
     COPY_N = "cpyank"
-    LEHRER_PERMUTE = "permute"
+    LEHMER_PERMUTE = "permute"
 
     # Logical
     BOOL_COERCE = "bool"
