@@ -4,6 +4,7 @@ import random
 import numpy as np
 
 from errors.PyHexCastError import PyHexCastError
+from token_types.DropKeep import DropKeep
 from token_types.NumberLiteral import NumberLiteral
 from token_types.Operator import Operator
 from util.LehrerDecoder import permute_end_of_list
@@ -177,4 +178,145 @@ class Executor:
         elif instruction == Operator.LEHMER_PERMUTE:
             code = self.stack.pop()
             self.stack = permute_end_of_list(self.stack, code)
+        elif isinstance(instruction, DropKeep):
+            drop_order = instruction.get_drop_order()
+            padding = len(self.stack) - len(drop_order)
+            drop_order = [False] * padding + drop_order[::-1]
+            self.stack = [item for item, drop in zip(self.stack, drop_order) if not drop]
 
+        # Logical operators
+        elif instruction == Operator.BOOL_COERCE:
+            item = self.stack.pop()
+            if item == 0 or item is None or item == []:
+                self.stack.append(False)
+            else:
+                self.stack.append(True)
+        elif instruction == Operator.BOOL_TO_NUM:
+            item = self.stack.pop()
+            # Prevents truthy things from qualifying
+            if not isinstance(item, bool):
+                raise ValueError("value must be boolean")
+            if item:
+                self.stack.append(1)
+            else:
+                self.stack.appent(0)
+        elif instruction == Operator.NOT:
+            item = self.stack.pop()
+            if not isinstance(item, bool):
+                raise ValueError("value must be boolean")
+            self.stack.append(not item)
+        elif instruction == Operator.OR:
+            a = self.stack.pop()
+            b = self.stack.pop()
+            if not (isinstance(a, bool) and isinstance(a, bool)):
+                raise ValueError("values must be boolean")
+            self.stack.append(a or b)
+        elif instruction == Operator.AND:
+            a = self.stack.pop()
+            b = self.stack.pop()
+            if not (isinstance(a, bool) and isinstance(a, bool)):
+                raise ValueError("values must be boolean")
+            self.stack.append(a and b)
+        elif instruction == Operator.XOR:
+            a = self.stack.pop()
+            b = self.stack.pop()
+            if not (isinstance(a, bool) and isinstance(a, bool)):
+                raise ValueError("values must be boolean")
+            self.stack.append(a ^ b)
+        elif instruction == Operator.CONDITIONAL_REMOVE:
+            a = self.stack.pop()
+            if not isinstance(a, bool):
+                raise ValueError("value must be boolean")
+            if a:
+                self.stack.pop(-2)
+            else:
+                self.stack.pop()
+        elif instruction == Operator.EQ:
+            a = self.stack.pop()
+            b = self.stack.pop()
+            self.stack.append(a == b)
+        elif instruction == Operator.NOT_EQ:
+            a = self.stack.pop()
+            b = self.stack.pop()
+            self.stack.append(a != b)
+        elif instruction == Operator.GT:
+            a = self.stack.pop()
+            b = self.stack.pop()
+            self.stack.append(a > b)
+        elif instruction == Operator.LT:
+            a = self.stack.pop()
+            b = self.stack.pop()
+            self.stack.append(a < b)
+        elif instruction == Operator.GE:
+            a = self.stack.pop()
+            b = self.stack.pop()
+            self.stack.append(a >= b)
+        elif instruction == Operator.LE:
+            a = self.stack.pop()
+            b = self.stack.pop()
+            self.stack.append(a >= b)
+
+        # List manip
+        elif instruction == Operator.INDEX:
+            index = self.stack.pop()
+            lst = self.stack.pop()
+            self.stack.appent(lst[index])
+        elif instruction == Operator.SUBLIST:
+            lower = self.stack.pop()
+            upper = self.stack.pop()
+            lst = self.stack.pop()
+            self.stack.append(lst[lower:upper])
+        elif instruction == Operator.APPEND:
+            app = self.stack.pop()
+            lst = self.stack.pop()
+            self.stack.appent(lst.append(app))
+        elif instruction == Operator.EXTEND:
+            ext = self.stack.pop()
+            lst = self.stack.pop()
+            self.stack.appent(lst.extend(ext))
+        elif instruction == Operator.EMPTY_LST:
+            self.stack.appent([])
+        elif instruction == Operator.SINGLET:
+            item = self.stack.pop()
+            self.stack.append([item])
+        elif instruction == Operator.LENGTH:
+            lst = self.stack.pop()
+            self.stack.append(len(lst))
+        elif instruction == Operator.REVERSE:
+            lst = self.stack.pop()
+            self.stack.append(lst[::-1])
+        elif instruction == Operator.FIND:
+            num = self.stack.pop()
+            lst = self.stack.pop()
+            self.stack.append(lst.find(num))
+        elif instruction == Operator.DELETE_INDEX:
+            index = self.stack.pop()
+            lst = self.stack.pop()
+            self.stack.append(lst.pop(index))
+        elif instruction == Operator.SET_INDEX:
+            try:
+                item = self.stack.pop()
+                index = self.stack.pop()
+                lst = self.stack.pop()
+                lst[index] = item
+                self.stack.append(lst)
+            except IndexError:
+                pass
+        elif instruction == Operator.MK_LST:
+            count = self.stack.pop()
+            lst = []
+            for i in range(count):
+                lst.appent(self.stack.pop())
+            self.stack.append(lst)
+        elif instruction == Operator.UNMK_LST:
+            lst = self.stack.pop()
+            self.stack.extend(lst)
+        elif instruction == Operator.ENQUEUE:
+            item = self.stack.pop()
+            lst = self.stack.pop()
+            lst.insert(0, item)
+            self.stack.append(lst)
+        elif instruction == Operator.DEQUEUE:
+            lst = self.stack.pop()
+            item = lst.pop(0)
+            self.stack.extend([lst, item])
