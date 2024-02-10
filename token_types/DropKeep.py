@@ -11,6 +11,9 @@ class DropKeep:
     def get_drop_order(self):
         drop_keep = self.value.replace("dk_", "")
         drop_keep = [True if i == "d" else False for i in drop_keep]
+        # Makes a dropkeep of all drop_keeps act as nop
+        if not any(drop_keep):
+            return []
         return drop_keep
 
     def __str__(self):

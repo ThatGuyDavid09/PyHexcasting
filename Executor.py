@@ -23,6 +23,8 @@ class Executor:
     def execute_instructions(self, instructions):
         if isinstance(instructions, PyHexCastError):
             raise instructions
+
+        did_halt = False
         for instruction in instructions:
             stop = False
             try:
@@ -30,9 +32,11 @@ class Executor:
             except Exception as e:
                 print(f"Error at \"{instruction}\"")
                 print("    " + str(e))
-            if stop:
+            if stop or self.execution_mode == ExecutionMode.STOP:
+                did_halt = True
                 break
         self.execution_mode = ExecutionMode.NORMAL
+        return did_halt
 
     def execute_instruction(self, instruction):
         # Skip and stop if somehow we got here in a stopped execution mode
@@ -220,6 +224,9 @@ class Executor:
             self.stack = permute_end_of_list(self.stack, code)
         elif isinstance(instruction, DropKeep):
             drop_order = instruction.get_drop_order()
+            if len(drop_order) > len(self.stack):
+                raise RuntimeError("stack too small for dropkeep")
+
             padding = len(self.stack) - len(drop_order)
             drop_order = [False] * padding + drop_order[::-1]
             self.stack = [item for item, drop in zip(self.stack, drop_order) if not drop]
@@ -370,8 +377,8 @@ class Executor:
         elif instruction == Operator.START_ESCAPE_SEQ:
             self.execution_mode = ExecutionMode.ESCAPE_MANY
         elif instruction == Operator.END_ESCAPE_SEQ:
-        # This can only happen if end escape seq was processed before
-        # start escape seq, and as such, is an error
+            # This can only happen if end escape seq was processed before
+            # start escape seq, and as such, is an error
             raise RuntimeError(')" executed before "("')
 
         # Storage
@@ -488,8 +495,11 @@ class Executor:
             executor = Executor()
             executor.stack = self.stack
             executor.temporary = self.temporary
-            executor.execute_instructions(to_execute)
+            stop = executor.execute_instructions(to_execute)
             self.stack = executor.stack
+            if stop:
+                self.execution_mode = ExecutionMode.STOP
+                return True
         elif instruction == Operator.LIST_EVAL:
             items = self.stack.pop()
             instructions = self.stack.pop()
@@ -515,4 +525,3 @@ class Executor:
             pass
         else:
             raise RuntimeError(f"\"{instruction}\" is an invalid operator")
-
