@@ -58,6 +58,8 @@ class Executor:
                 self.execution_mode = ExecutionMode.NORMAL
                 self.stack.append(self.escaped_many)
                 self.escaped_many = []
+            elif instruction == Operator.ESCAPE:
+                self.escape_mode = EscapeMode.ESCAPE_NEXT
             else:
                 self.escaped_many.append(instruction)
             return
