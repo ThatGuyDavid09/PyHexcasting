@@ -31,11 +31,18 @@ class LehrerDecoder:
 
     @staticmethod
     def decode_lehmer_code(value, stack):
-        strides = list(filter(lambda x: x <= value, factorial()))
+        value = int(value)
+        # strides = list(filter(lambda x: x <= value, factorial()))
+        strides = []
+        factorial_gen = Factorial()
+        next_val = next(factorial_gen)
+        while next_val <= value:
+            strides.append(next_val)
+            next_val = next(factorial_gen)
 
         # if len(stack) < len(strides):
         #     raise ValueError("Manipulating too many elements on the stack!")
-
+        # TODO fix this
         stride_offset = len(stack) - len(strides)
         edit_target = stack[stride_offset:]
         swap = edit_target[:]
