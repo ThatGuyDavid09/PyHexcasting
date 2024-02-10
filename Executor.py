@@ -28,11 +28,11 @@ class Executor:
         did_halt = False
         for instruction in instructions:
             stop = False
-            # try:
-            stop = self.execute_instruction(instruction)
-            # except Exception as e:
-            #     print(f"Error at \"{instruction}\"")
-            #     print("    " + str(e))
+            try:
+                stop = self.execute_instruction(instruction)
+            except Exception as e:
+                print(f"Error at \"{instruction}\"")
+                print("    " + str(e))
             if stop or self.execution_mode == ExecutionMode.STOP:
                 did_halt = True
                 break
