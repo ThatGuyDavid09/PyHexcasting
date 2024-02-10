@@ -24,17 +24,20 @@ class Executor:
         if isinstance(instructions, PyHexCastError):
             raise instructions
         for instruction in instructions:
-            stop = self.execute_instruction(instruction)
+            stop = False
+            try:
+                stop = self.execute_instruction(instruction)
+            except Exception as e:
+                print(f"Error at \"{instruction}\"")
+                print("    " + str(e))
             if stop:
                 break
+        self.execution_mode = ExecutionMode.NORMAL
 
     def execute_instruction(self, instruction):
         # Skip and stop if somehow we got here in a stopped execution mode
         if self.execution_mode == ExecutionMode.STOP:
             return True
-
-        if isinstance(instruction, NumberLiteral):
-            self.stack.append(instruction.value)
 
         # Handle escape
         if self.escape_mode == EscapeMode.ESCAPE_NEXT:
@@ -42,6 +45,7 @@ class Executor:
                 self.escaped_many.append(instruction)
             else:
                 self.stack.append(instruction)
+            self.escape_mode = EscapeMode.NORMAL
             return
 
         # Handle escape many
@@ -54,6 +58,9 @@ class Executor:
                 self.escaped_many.append(instruction)
             return
 
+        if isinstance(instruction, NumberLiteral):
+            self.stack.append(instruction.value)
+            return
 
         # Simple math
         if instruction == Operator.ADD:
@@ -101,7 +108,7 @@ class Executor:
             x = self.stack.pop()
             y = self.stack.pop()
             z = self.stack.pop()
-            self.stack.append(np.array([x, y, z]))
+            self.stack.append(np.array([x, y, z][::-1]))
         elif instruction == Operator.VCTR_UNMK:
             a = self.stack.pop()
             self.stack.extend([a.x, a.y, a.z])
@@ -183,6 +190,9 @@ class Executor:
         elif instruction == Operator.DUP_N:
             times = self.stack.pop()
             element = self.stack.pop()
+            if not times.is_integer():
+                raise ValueError("argument must be integer")
+            times = int(times)
             self.stack.extend([element] * times)
         elif instruction == Operator.DUP_2:
             stack = self.stack
@@ -334,10 +344,13 @@ class Executor:
                 pass
         elif instruction == Operator.MK_LST:
             count = self.stack.pop()
+            if not count.is_integer():
+                raise ValueError("Argument must be integer")
+            count = int(count)
             lst = []
             for i in range(count):
                 lst.append(self.stack.pop())
-            self.stack.append(lst)
+            self.stack.append(lst[::-1])
         elif instruction == Operator.UNMK_LST:
             lst = self.stack.pop()
             self.stack.extend(lst)
@@ -364,7 +377,7 @@ class Executor:
         # Storage
         elif instruction == Operator.PRINT:
             a = self.stack.pop()
-            print(a)
+            print(f'"{a}"')
         elif instruction == Operator.STORE_TEMP:
             a = self.stack.pop()
             self.temporary = a
@@ -492,6 +505,14 @@ class Executor:
         elif instruction == Operator.HALT:
             self.execution_mode = ExecutionMode.STOP
             return True
+
+        # Convenience
+        elif instruction == Operator.CLEAR:
+            self.stack.clear()
+            self.temporary = None
+
+        elif instruction == "EOF":
+            pass
         else:
-            raise RuntimeError("Invalid operator")
+            raise RuntimeError(f"\"{instruction}\" is an invalid operator")
 

@@ -14,10 +14,19 @@ def main():
     executor = Executor()
     while True:
         instructions = input()
-        lexer = Lexer(instructions)
-        parsed = Parser(lexer).process_all_tokens()
-        executor.execute_instructions(parsed)
-        print(f"{executor.stack}")
+        try:
+            lexer = Lexer(instructions)
+            parsed = Parser(lexer).process_all_tokens()
+            executor.execute_instructions(parsed)
+        except Exception as e:
+            print("Exception at parsing")
+            print("    " + str(e))
+            continue
+
+        if executor.temporary is not None:
+            print(f"Temp - {executor.temporary}")
+        for i in executor.stack[::-1]:
+            print(f"{i}")
 
 
 if __name__ == "__main__":

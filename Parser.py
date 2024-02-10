@@ -31,6 +31,36 @@ class Parser:
         if token.replace('.', '').isnumeric():
             return NumberLiteral(float(token)), True
 
+        # Operators are not case sensitive and some common replacements
+        token = token.lower()
+        token = token.replace("list", "lst")
+        token = token.replace("vector", "vec")
+        token = token.replace("make", "mk")
+        token = token.replace("clear", "clr")
+
+        mapping = {
+            "add": "+",
+            "sub": "-",
+            "mul": "*",
+            "div": "/",
+            "abs": "|",
+            "mag": "|",
+            "pwr": "^",
+            "power": "^",
+            "eq": "==",
+            "not_eq": "!=",
+            "neq": "!=",
+            "gt": ">",
+            "lt": "<",
+            "ge": ">=",
+            "geq": ">=",
+            "le": "<=",
+            "leq": "<="
+        }
+
+        mapped = mapping.get(token, token)
+        token = mapped
+
         # Handle drop_keep specifically
         if token[:3] == "dk_":
             try:

@@ -7,3 +7,4 @@ class Lexer:
             return self.tokens.pop(0)
         else:
             return "\n"
+
