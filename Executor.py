@@ -6,7 +6,7 @@ import numpy as np
 from errors.PyHexCastError import PyHexCastError
 from token_types.NumberLiteral import NumberLiteral
 from token_types.Operator import Operator
-from util.LehrerDecoder import LehrerDecoder
+from util.LehrerDecoder import permute_end_of_list
 
 
 class Executor:
@@ -176,5 +176,5 @@ class Executor:
             self.stack = stack
         elif instruction == Operator.LEHMER_PERMUTE:
             code = self.stack.pop()
-            self.stack = LehrerDecoder.decode_lehmer_code(code, self.stack)
+            self.stack = permute_end_of_list(self.stack, code)
 

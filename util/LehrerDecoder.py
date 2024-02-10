@@ -1,57 +1,101 @@
 import math
 
 
-class Factorial:
-    def __init__(self):
-        self.acc = 1
-        self.n = 1
+def static_var(varname, value):
+    def decorate(func):
+        setattr(func, varname, value)
+        return func
 
-    def __iter__(self):
-        return self
-
-    def __next__(self):
-        val = self.acc
-        self.acc *= self.n
-        self.n += 1
-        return val
+    return decorate
 
 
-def factorial():
-    acc = 1
-    n = 1
-
-    while True:
-        val = acc
-        acc *= n
-        n += 1
-        yield val
+@static_var("lut", [1])
+def factorial(n):
+    while n >= len(factorial.lut):
+        factorial.lut.append(factorial.lut[-1] * len(factorial.lut))
+    return factorial.lut[n]
 
 
-class LehrerDecoder:
+def encode(permutation):
+    """Return Lehmer Code of the given permutation.
+    """
 
-    @staticmethod
-    def decode_lehmer_code(value, stack):
-        value = int(value)
-        # strides = list(filter(lambda x: x <= value, factorial()))
-        strides = []
-        factorial_gen = Factorial()
-        next_val = next(factorial_gen)
-        while next_val <= value:
-            strides.append(next_val)
-            next_val = next(factorial_gen)
+    def permutation_is_valid(permutation):
+        if not permutation:
+            return False
 
-        # if len(stack) < len(strides):
-        #     raise ValueError("Manipulating too many elements on the stack!")
-        # TODO fix this
-        stride_offset = len(stack) - len(strides)
-        edit_target = stack[stride_offset:]
-        swap = edit_target[:]
+        minimum = min(permutation)
+        maximum = max(permutation)
 
-        while strides:
-            divisor = strides.pop(0)
-            index = value // divisor
-            value %= divisor
-            edit_target[0] = swap.pop(index)
-            edit_target = edit_target[1:]
+        used = [0] * (maximum - minimum + 1)
+        for i in permutation:
+            used[i - minimum] += 1
 
-        return stack
+        if min(used) == 1 and max(used) == 1:
+            return True
+        else:
+            return False
+
+    def count_lesser(i, permutation):
+        return sum(it < permutation[i] for it in permutation[i + 1:])
+
+    def parial_result(i, permutation):
+        return count_lesser(i, permutation) * factorial(len(permutation) - 1 - i)
+
+    if not permutation_is_valid(permutation):
+        return False
+
+    return sum(parial_result(i, permutation) for i in range(0, len(permutation)))
+
+def find_lehmer_length(lehmer):
+    if lehmer == 0:
+        return 1
+    if lehmer == 1:
+        return 2
+    length = 0
+    while lehmer < factorial(length):
+        length += 1
+    return length - 1
+
+
+def decode(length, lehmer):
+    """Return permutation for the given Lehmer Code and permutation length. Result permutation contains
+    number from 0 to length-1.
+    """
+    # length = find_lehmer_length(lehmer)
+
+    result = [(lehmer % factorial(length - i)) // factorial(length - 1 - i) for i in range(length)]
+    used = [False] * length
+    for i in range(length):
+        counter = 0
+        for j in range(length):
+            if not used[j]:
+                counter += 1
+            if counter == result[i] + 1:
+                result[i] = j
+                used[j] = True
+                break
+    return result
+
+def lehmer_to_permutation(lehmer_code):
+    """Convert Lehmer code to permutation."""
+    n = len(lehmer_code)
+    permutation = []
+    available_numbers = list(range(1, n+1))
+
+    for i in range(n):
+        index = lehmer_code[i]
+        permutation.append(available_numbers.pop(index))
+
+    return permutation
+
+def permute_end_of_list(lst, lehmer_code):
+    """Permute the end of a list according to a Lehmer code."""
+    perm_lst = decode(len(lst), lehmer_code)
+    # permutation = lehmer_to_permutation(perm_lst)
+    n = len(perm_lst)
+    end_part = lst[-n:]
+
+    permuted_end_part = [end_part[i] for i in perm_lst]
+    lst[-n:] = permuted_end_part
+    return lst
