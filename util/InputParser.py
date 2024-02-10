@@ -1,5 +1,6 @@
 from Lexer import Lexer
 from Parser import Parser
+from token_types.NumberLiteral import NumberLiteral
 
 
 class InputParser:
@@ -29,4 +30,6 @@ class InputParser:
         else:
             # lexer = Lexer(user_input)
             parsed, _ = Parser().parse_token(user_input)
+            if isinstance(parsed, NumberLiteral):
+                return parsed.value
             return parsed
