@@ -118,7 +118,7 @@ class Executor:
             self.stack.append(np.array([x, y, z][::-1]))
         elif instruction == Operator.VCTR_UNMK:
             a = self.stack.pop()
-            self.stack.extend([a.x, a.y, a.z])
+            self.stack.extend([a[0], a[1], a[2]])
         elif instruction == Operator.MOD:
             a = self.stack.pop()
             b = self.stack.pop()

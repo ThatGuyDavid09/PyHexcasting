@@ -1,8 +1,11 @@
+import numpy as np
+
 from errors.HexCastSyntaxError import HexCastSyntaxError
 from errors.PyHexCastError import PyHexCastError
 from token_types.DropKeep import DropKeep
 from token_types.NumberLiteral import NumberLiteral
 from token_types.Operator import Operator
+from token_types.VectorLiteral import VectorLiteral
 
 
 class Parser:
@@ -31,6 +34,12 @@ class Parser:
             return "EOF", False
         if token.replace('.', '').isnumeric():
             return NumberLiteral(float(token)), True
+
+        token = token.replace("vector", "vec")
+        if "vec([" in token or "np.array" in token:
+            token = token.replace("vector", "vec")
+            token = token.replace("vec", "np.array")
+            return VectorLiteral(eval(token)), True
 
         # Operators are not case sensitive and some common replacements
         token = token.lower()
